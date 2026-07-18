@@ -60,6 +60,7 @@ function Index() {
   return (
     <main className="relative w-full bg-[color:var(--color-background)] text-[color:var(--color-foreground)]">
       <CustomCursor />
+      <Navbar />
       <Hero />
       <Challenges />
       <WhatWeDo />

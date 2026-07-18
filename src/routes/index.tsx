@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CustomCursor } from "@/components/az/CustomCursor";
+import { Navbar } from "@/components/az/Navbar";
 import { Hero } from "@/components/az/Hero";
 import { Challenges } from "@/components/az/Challenges";
 import { WhatWeDo } from "@/components/az/WhatWeDo";

@@ -14,12 +14,14 @@ const TITLE =
 const DESC =
   "Dubai-based business transformation and growth advisory firm helping SMEs fix operational issues, scale sustainably, and expand into the UAE market.";
 
+const SITE = "https://azventures.co";
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
   name: "AZ Ventures Advisory LLC",
   description: DESC,
-  url: "/",
+  url: SITE,
   email: "azventuresadvisory@gmail.com",
   telephone: "+971 4 269 8181",
   areaServed: "Dubai, United Arab Emirates",

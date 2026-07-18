@@ -81,10 +81,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "AZ Ventures Advisory" },
       { name: "twitter:card", content: "summary_large_image" },
+      { title: "AZ Ventures" },
+      { property: "og:title", content: "AZ Ventures" },
+      { name: "twitter:title", content: "AZ Ventures" },
+      { name: "description", content: "AZ Ventures Advisory offers business transformation, turnaround, and growth services." },
+      { property: "og:description", content: "AZ Ventures Advisory offers business transformation, turnaround, and growth services." },
+      { name: "twitter:description", content: "AZ Ventures Advisory offers business transformation, turnaround, and growth services." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Q6DFM5GuBObDnqzDpAq6DmvoysM2/social-images/social-1784377239411-azventureslogo1_(1).webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Q6DFM5GuBObDnqzDpAq6DmvoysM2/social-images/social-1784377239411-azventureslogo1_(1).webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

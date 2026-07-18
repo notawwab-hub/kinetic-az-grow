@@ -12,7 +12,7 @@ const lines = [
 
 export function Challenges() {
   return (
-    <section className="relative w-full px-6 py-32 md:px-16 md:py-48">
+    <section id="challenges" className="relative w-full px-6 py-32 md:px-16 md:py-48">
       <div className="mb-16 flex items-baseline justify-between">
         <h2 className="font-display text-[clamp(2rem,6vw,4.5rem)] leading-[0.95] tracking-[-0.03em]">
           The Challenges<br />We Solve.

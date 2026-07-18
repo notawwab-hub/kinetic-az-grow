@@ -29,8 +29,14 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   * {
     border-color: var(--color-border);
+  }
+  section[id] {
+    scroll-margin-top: 5rem;
   }
   html,
   body {
@@ -39,6 +45,14 @@
     font-family: var(--font-display);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  body {
+    overflow-x: hidden;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
   body {
     overflow-x: hidden;

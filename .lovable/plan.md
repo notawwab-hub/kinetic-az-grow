@@ -1,79 +1,54 @@
+## Fixes for azventures.co pre-launch
 
-# AZ Ventures Advisory — Kinetic Typography Site
+### 1. Hero headline clipping
+Current `Hero.tsx` uses `max-w-[18ch]` with `text-[clamp(2.75rem,10.5vw,10.5rem)]` and a skewX transform on the whole `<h1>`. At wide viewports the last word ("value.") gets pushed past the container edge and the italic "stronger" descender clips because `overflow-hidden` is on the section. Fix:
+- Widen the headline container (`max-w-none`, or `max-w-[22ch]` with an outer `pr-*` guard) and reduce the max clamp (e.g. `clamp(2.5rem, 9vw, 8.5rem)`) so both lines fit on desktop and mobile.
+- Add vertical breathing room (`pb-[0.15em]`) so italic/descenders aren't cropped by `overflow-hidden`.
+- Reduce skew amplitude on small screens (disable skew under `md`) since it amplifies clipping on narrow widths.
 
-Single-page marketing site built on the existing TanStack Start + React + Tailwind v4 stack, adding Framer Motion for scroll-driven kinetic typography. Zero imagery/icons — type is the design.
+### 2. Process section only shows steps 01–02
+The desktop pinned-scroll uses `height: 500vh` and translates the strip by `-80%` of its own width (which is `500vw`), which mathematically should land on step 05. In practice the section stops scrolling early because it sits at the end of the page with no room below, so `scrollYProgress` never reaches 1 before the next section takes over and only steps 01–02 come into view. Fix:
+- Compute translate as `-((n-1)/n * 100)%` = `-80%` but map it to `useTransform(scrollYProgress, [0, 0.95], ...)` and add a trailing spacer so the sticky container can actually complete its scroll range.
+- Alternatively (simpler + more reliable): translate in `vw` units — `useTransform(scrollYProgress, [0, 1], [0, -(steps.length - 1) * 100])` and apply as `x: \`${v}vw\``. This decouples math from container width.
+- Verify with a Playwright scroll test that steps 03/04/05 render.
 
-## Stack & setup
+### 3. Missing navbar / site menu
+Add a fixed top navbar rendered inside `__root.tsx` (so it appears on every route, including future pages) with:
+- Wordmark "AZ Ventures" linking to `/`.
+- Section anchors: Challenges, What We Do, Process, Clients, Vision, Contact (add matching `id="..."` to each section component).
+- CTA button "Start a conversation" → `#contact`.
+- Mobile: hamburger opens a full-screen overlay menu with the same links, large tap targets (min 44px), smooth close on link tap.
+- Style: transparent over hero, gains a subtle backdrop-blur + border when scrolled (IntersectionObserver on hero or scrollY listener).
+- Respect `prefers-reduced-motion`.
 
-- Add `framer-motion` via bun.
-- Fonts loaded through `<link>` tags in `__root.tsx` head (Bricolage Grotesque variable, Instrument Serif, JetBrains Mono) with `preconnect` + `font-display: swap`. Preload Bricolage variable woff2.
-- Register font family CSS vars in `src/styles.css` under `@theme`: `--font-display: "Bricolage Grotesque"`, `--font-serif: "Instrument Serif"`, `--font-mono: "JetBrains Mono"`.
-- Override design tokens on `:root`: `--background: #0A0A0A`, `--foreground: #F2F0EA`, plus new `--color-ember: #FF4D1C`.
-- Hide native cursor globally on `(pointer: fine)` only.
+### 4. Mobile optimization pass
+Audit every section at 360–430px widths:
+- Ensure headings use `clamp()` with a sensible min so nothing overflows; add `min-w-0` and `break-words` where needed.
+- Replace any horizontal-scroll or pinned-scroll effects with stacked layouts on touch devices (Process already does this; verify Challenges, WhatWeDo, WhoWeWorkWith, Vision).
+- Ensure section padding is `px-6` on mobile / `px-16` on desktop consistently.
+- Tap targets ≥ 44px; disable custom cursor on touch (verify `CustomCursor`).
+- Contact form/CTA reachable without horizontal scroll; email/phone are `tel:`/`mailto:` links.
+- Confirm the `[ 0X / 06 ]` counters shown in corners don't overlap content on small screens.
 
-## Route & SEO
+### 5. Full pre-launch review
+- **SEO / metadata**: add per-section anchor IDs, verify canonical URL uses the real domain (`https://azventures.co/`) not `/`; update `og:url`, canonical, and JSON-LD `url`. Replace `/og.jpg` with a real generated OG image at absolute URL. Ensure single H1 (Hero) and section H2s.
+- **Favicon / manifest**: verify `favicon.ico`, `apple-touch-icon.png`, `site.webmanifest`, theme-color meta are present in `__root.tsx`.
+- **Accessibility**: add `aria-label` to nav, ensure color contrast on `--color-muted-foreground` meets WCAG AA, add `alt` text to any imagery, add `aria-current` on active nav link, focus-visible outlines on interactive elements.
+- **Performance**: lazy-load below-the-fold heavy motion sections; preconnect to any font hosts; ensure images are `loading="lazy"` and sized.
+- **Content sweep**: verify the phone `+971 4 269 8181`, email `azventuresadvisory@gmail.com`, and any stats/claims ("500+ Businesses", "30+ Years") match what the user wants public.
+- **Legal**: add a footer with copyright, links to Privacy Policy and Terms (stub pages under `src/routes/privacy.tsx`, `src/routes/terms.tsx` with placeholder copy the user can fill).
+- **Sitemap**: verify `sitemap[.]xml.ts` lists the real routes and uses `azventures.co`.
+- **Analytics**: (optional) ask whether to wire Plausible / GA4.
 
-Rewrite `src/routes/index.tsx` with the full page. `head()` sets:
-- title, meta description (as specified), canonical `/`, og:title/description/type=website/url=/, og:image=`/og.jpg`, twitter:card=summary_large_image.
-- JSON-LD ProfessionalService script.
+### Verification
+After implementation:
+1. Playwright script at 375px, 768px, 1440px viewports — screenshot each section, confirm no clipping.
+2. Scroll test on Process section — confirm all 5 steps render.
+3. Click through navbar links on desktop and mobile menu.
+4. Build check.
 
-Update `__root.tsx` head: `<html lang="en">` already set; keep viewport; remove default "Lovable App" title so the leaf title wins. Add font `<link>` tags in root `links`.
-
-Add:
-- `public/robots.txt` (allow all).
-- `src/routes/sitemap[.]xml.ts` server route with `/`.
-- `public/og.jpg` — generated dark card with "AZ Ventures Advisory" wordmark (via imagegen, 1200x630).
-
-## Component structure
-
-All under `src/components/az/`:
-
-- `CustomCursor.tsx` — spring-lagged ember dot via `useMotionValue` + `useSpring`. Grows on hover of `[data-cursor="link"]`. Gated by `matchMedia('(pointer: fine)')`; returns null on touch. Uses `requestAnimationFrame` implicit via Motion.
-- `useReducedMotion.ts` wrapper — re-exports Motion's hook.
-- `Hero.tsx` (Section 1) — h1 with per-word spans; each word's `fontVariationSettings` (`wght`) animates via `useScroll` on the hero section, so scrolling back up leaves a slightly heavier resting weight (target 200→700, resting 500). "stronger" span uses Instrument Serif italic + ember. Skew tied to pointer X via `useMotionValue` + spring, clamped ±4deg, resets on leave. Mono tag, text-link CTA with animated ember underline (scaleX 0→1). Stat strip fades in 200ms after headline, with reserved min-height to prevent CLS.
-- `Challenges.tsx` (Section 2) — six lines. Each line is a component that uses `useScroll({ target, offset: ["start end","end start"] })` + `useTransform` to compute opacity/scale from distance to viewport center continuously. Scramble effect: on first entry within threshold, run a ~500ms interval swapping random chars until resolved; on reduced motion, plain fade.
-- `WhatWeDo.tsx` (Section 3) — three stacked words. Default: `-webkit-text-stroke` outline, transparent fill, faint animated conic-gradient/noise clipped by `background-clip: text`. Hover (desktop) / tap (mobile via `useState` per row) fills solid ember + reveals adjacent line via width/opacity transition. Toggle via `onPointerEnter`/`onClick` so touch works.
-- `Process.tsx` (Section 4) — `useScroll` on a tall wrapper (`height: 500vh`) with sticky inner. Horizontal `x` transform on step track tied to scroll progress; thin ember progress line width tied to same. Distance chosen so progress hits 100% exactly as the sticky releases (no dead scroll). Below `md`: renders as vertical stack with each step animating in via `whileInView`.
-- `WhoWeWorkWith.tsx` (Section 5) — two marquee rows using Motion `animate` on `x` with `repeat: Infinity`, linear, 50s. Content array duplicated ×3 minimum, `whiteSpace: nowrap`. Pause on `hover` via `onHoverStart/End` setting `animationPlayState` — implemented by toggling a `paused` state that stops the animation. Outline-only text via `-webkit-text-stroke`.
-- `Vision.tsx` (Section 6) — split closing sentence into chars. Each char starts at random offscreen offset (`x/y` between ±window dims) and rotate, `useScroll` on section with `offset: ["start end","center center"]` drives progress from 0→1; `useTransform` maps to per-char `x`,`y`,`rotate`→0 with 900–1200ms feel. Uses `useTransform` per char (memoized). Reduced motion: static fade.
-- `Contact.tsx` (Section 7) — h2 with SVG `<filter>` displacement (`feTurbulence`+`feDisplacementMap`) applied conditionally; on pointer move update filter `scale` attr via ref (`requestAnimationFrame`) toward cursor distance; on leave spring back to 0. Fallback: transform skew. Three links (mailto, tel, tel + wa.me) each 44px tap target. Footer line.
-
-## Interaction & motion rules
-
-- All animation uses `transform` / `opacity` / `font-variation-settings` — no width/height/top layout thrash (marquee uses `x`).
-- Easing: cubic-bezier `[0.22, 1, 0.36, 1]` (ease-out-quint), 600–900ms, Vision up to 1.2s.
-- One major animated element per section (scramble lines are sequential by scroll position, not simultaneous).
-- Reduced-motion: guard scramble, char assembly, weight-morph, and skew — replace with plain fade/opacity.
-- Mobile: `useIsTouch` hook (matchMedia pointer:coarse) disables cursor, switches Process to vertical, WhatWeDo hover→tap.
-
-## Responsive
-
-- Headlines use `clamp()` via arbitrary Tailwind values (e.g. `text-[clamp(3rem,12vw,10rem)]`).
-- Marquee text sized so at 375px width no words clip; `overflow: hidden` on marquee container, but inner track is `w-max`.
-- Touch targets: min-h-11 min-w-11 on all links/buttons.
-
-## Files created/modified
-
-Created:
-- `src/components/az/CustomCursor.tsx`
-- `src/components/az/Hero.tsx`
-- `src/components/az/Challenges.tsx`
-- `src/components/az/WhatWeDo.tsx`
-- `src/components/az/Process.tsx`
-- `src/components/az/WhoWeWorkWith.tsx`
-- `src/components/az/Vision.tsx`
-- `src/components/az/Contact.tsx`
-- `src/components/az/hooks.ts` (useIsTouch, useReducedMotionSafe)
-- `src/routes/sitemap[.]xml.ts`
-- `public/robots.txt`
-- `public/og.jpg` (generated)
-
-Modified:
-- `src/routes/index.tsx` — assembles sections + mounts CustomCursor, sets head/JSON-LD.
-- `src/routes/__root.tsx` — font `<link>`s, remove default title so leaf wins.
-- `src/styles.css` — palette override, font tokens, cursor hiding, text-stroke utility.
-- `package.json` — add `framer-motion`.
-
-## Final QA
-
-Manual scroll top-to-bottom in Playwright at 1280 and 390 widths, screenshotting each section, verifying: no images/icons rendered, no clipped marquee words, Process pin releases with no dead scroll, Vision fully assembles, contact links present.
+### Open questions (please confirm before I build)
+1. **Logo / wordmark**: use plain text "AZ Ventures" for now, or do you have a logo file to drop in?
+2. **Footer legal pages**: create empty Privacy/Terms stubs, or skip until you have copy?
+3. **OG image**: want me to generate a branded hero-style OG image, or leave `/og.jpg` for you to supply?
+4. **Analytics**: add Plausible/GA4 now or later?

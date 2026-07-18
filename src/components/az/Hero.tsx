@@ -58,12 +58,13 @@ export function Hero() {
 
   return (
     <section
+      id="top"
       ref={ref}
-      className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 pt-32 pb-16 md:px-16"
+      className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 pt-32 pb-16 md:px-16 md:pt-40"
     >
       <motion.h1
         style={{ skewX: prefersReduced ? 0 : sSkew }}
-        className="max-w-[18ch] font-display leading-[0.9] tracking-[-0.03em] text-[clamp(2.75rem,10.5vw,10.5rem)]"
+        className="w-full max-w-[22ch] pb-[0.15em] pr-2 font-display leading-[0.95] tracking-[-0.03em] text-[clamp(2.25rem,8.5vw,8.5rem)] md:leading-[0.9]"
       >
         {[words, words2].map((row, ri) => (
           <span key={ri} className="block">

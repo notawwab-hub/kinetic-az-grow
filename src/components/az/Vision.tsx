@@ -10,6 +10,7 @@ export function Vision() {
 
   return (
     <section
+      id="vision"
       className="relative flex min-h-[130vh] w-full flex-col justify-center overflow-hidden px-6 py-32 md:px-16"
       suppressHydrationWarning
     >

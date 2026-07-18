@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CustomCursor } from "@/components/az/CustomCursor";
+import { Navbar } from "@/components/az/Navbar";
 import { Hero } from "@/components/az/Hero";
 import { Challenges } from "@/components/az/Challenges";
 import { WhatWeDo } from "@/components/az/WhatWeDo";
@@ -13,12 +14,14 @@ const TITLE =
 const DESC =
   "Dubai-based business transformation and growth advisory firm helping SMEs fix operational issues, scale sustainably, and expand into the UAE market.";
 
+const SITE = "https://azventures.co";
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
   name: "AZ Ventures Advisory LLC",
   description: DESC,
-  url: "/",
+  url: SITE,
   email: "azventuresadvisory@gmail.com",
   telephone: "+971 4 269 8181",
   areaServed: "Dubai, United Arab Emirates",
@@ -37,14 +40,12 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
-      { property: "og:image", content: "/og.jpg" },
+      { property: "og:url", content: SITE + "/" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: TITLE },
       { name: "twitter:description", content: DESC },
-      { name: "twitter:image", content: "/og.jpg" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: SITE + "/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -59,6 +60,7 @@ function Index() {
   return (
     <main className="relative w-full bg-[color:var(--color-background)] text-[color:var(--color-foreground)]">
       <CustomCursor />
+      <Navbar />
       <Hero />
       <Challenges />
       <WhatWeDo />

@@ -52,7 +52,7 @@ export function Contact() {
 
       <div>
         <p className="mb-8 font-mono text-xs tracking-[0.2em] text-[color:var(--color-muted-foreground)] uppercase">
-          [ 07 / 06 ] · Book a confidential business consultation.
+          [ 06 / 06 ] · Book a confidential business consultation.
         </p>
         <motion.h2
           ref={h2Ref}

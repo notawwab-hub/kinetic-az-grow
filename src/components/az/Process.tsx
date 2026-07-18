@@ -22,12 +22,15 @@ function ProcessDesktop() {
     target: ref,
     offset: ["start start", "end end"],
   });
-  // 5 steps → move by 80% (so last step lands centered)
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-80%"]);
+  // Translate in vw so it doesn't depend on the flex container's own width.
+  // Move by (n-1) * 100vw so the last step lands fully centered.
+  const xVw = useTransform(scrollYProgress, [0, 1], [0, -(steps.length - 1) * 100]);
+  const x = useMotionTemplate`${xVw}vw`;
   const progressW = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
     <section
+      id="process"
       ref={ref}
       className="relative w-full"
       style={{ height: `${steps.length * 100}vh` }}

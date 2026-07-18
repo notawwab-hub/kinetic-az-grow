@@ -11,7 +11,7 @@ const items = [
 
 export function WhoWeWorkWith() {
   return (
-    <section className="relative w-full overflow-hidden py-32 md:py-48">
+    <section id="clients" className="relative w-full overflow-hidden py-32 md:py-48">
       <div className="mb-12 flex items-baseline justify-between px-6 md:px-16">
         <h2 className="font-display text-[clamp(2rem,6vw,4.5rem)] leading-[0.95] tracking-[-0.03em]">
           Who We Work With.

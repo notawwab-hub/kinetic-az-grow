@@ -72,7 +72,7 @@ function ProcessDesktop() {
 
 function ProcessMobile() {
   return (
-    <section className="relative w-full px-6 py-24">
+    <section id="process" className="relative w-full px-6 py-24">
       <div className="mb-10 flex items-baseline justify-between">
         <h2 className="font-display text-[clamp(2rem,8vw,3rem)] leading-[0.95] tracking-[-0.03em]">
           Our Process.

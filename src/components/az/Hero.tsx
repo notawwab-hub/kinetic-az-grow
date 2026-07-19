@@ -125,11 +125,11 @@ export function Hero() {
           transition={{ duration: 0.9, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] tracking-[0.18em] text-[color:var(--color-muted-foreground)] uppercase md:text-xs"
         >
-          <span>500+ Businesses Guided</span>
+          <span>30+ Years of Family Expertise</span>
           <span aria-hidden>·</span>
-          <span>30+ Years in the UAE Market</span>
+          <span>Proven Across the UAE</span>
           <span aria-hidden>·</span>
-          <span>Backed by KAR Business Services</span>
+          <span>Now Advising the Middle East</span>
         </motion.div>
       </div>
 

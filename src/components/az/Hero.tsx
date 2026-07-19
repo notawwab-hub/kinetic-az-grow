@@ -7,6 +7,8 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import { useIsTouch } from "./hooks";
+
 
 const words = [
   { text: "Building", accent: false },

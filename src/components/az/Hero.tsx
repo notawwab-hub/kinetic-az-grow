@@ -24,6 +24,7 @@ const words2 = [
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
+  const touch = useIsTouch();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -31,11 +32,12 @@ export function Hero() {
   // Weight morphs 200 -> 700 as scroll enters, and settles at 500 as it exits (heavier resting)
   const weight = useTransform(scrollYProgress, [0, 0.35, 1], [200, 700, 500]);
 
-  // Skew from cursor X
+  // Skew: cursor-driven on desktop, scroll-linked fallback on touch
   const skew = useMotionValue(0);
   const sSkew = useSpring(skew, { stiffness: 150, damping: 20 });
+  const scrollSkew = useTransform(scrollYProgress, [0, 0.5, 1], [-3, 0, 3]);
   useEffect(() => {
-    if (prefersReduced) return;
+    if (prefersReduced || touch) return;
     const el = ref.current;
     if (!el) return;
     const move = (e: PointerEvent) => {
@@ -50,7 +52,8 @@ export function Hero() {
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerleave", leave);
     };
-  }, [prefersReduced, skew]);
+  }, [prefersReduced, touch, skew]);
+
 
   const [entered, setEntered] = useState(false);
   useEffect(() => {

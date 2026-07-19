@@ -57,11 +57,6 @@ function Row({ word, desc, index }: { word: string; desc: string; index: number 
         className={`font-display leading-[0.9] tracking-[-0.03em] text-[clamp(2.5rem,10vw,8rem)] ${
           active ? "" : "text-stroke"
         }`}
-        style={
-          active
-            ? { WebkitTextStroke: "0px transparent", color: "var(--color-ember)" }
-            : undefined
-        }
       >
         {word}
       </motion.h3>

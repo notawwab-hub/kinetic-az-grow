@@ -95,7 +95,7 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="font-mono text-xs tracking-[0.2em] text-[color:var(--color-muted-foreground)] uppercase"
         >
-          [ Trusted UAE Advisory — 30+ Years of Experience ]
+          [ Strategic Advisory — Middle East ]
         </motion.p>
       </div>
 

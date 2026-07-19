@@ -68,8 +68,8 @@ export function Hero() {
       className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 pt-32 pb-16 md:px-16 md:pt-40"
     >
       <motion.h1
-        style={{ skewX: prefersReduced ? 0 : sSkew }}
-        className="w-full max-w-[22ch] pb-[0.15em] pr-2 font-display leading-[0.95] tracking-[-0.03em] text-[clamp(2.25rem,8.5vw,8.5rem)] md:leading-[0.9]"
+        style={{ skewX: prefersReduced ? 0 : touch ? scrollSkew : sSkew }}
+        className="w-full max-w-full break-words hyphens-auto pb-[0.15em] pr-2 font-display leading-[0.95] tracking-[-0.03em] text-[clamp(1.9rem,10.5vw,8.5rem)] md:max-w-[22ch] md:leading-[0.9]"
       >
         {[words, words2].map((row, ri) => (
           <span key={ri} className="block">

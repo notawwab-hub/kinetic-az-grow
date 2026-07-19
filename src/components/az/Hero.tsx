@@ -74,15 +74,17 @@ export function Hero() {
         {[words, words2].map((row, ri) => (
           <span key={ri} className="block">
             {row.map((w, i) => (
-              <HeroWord
-                key={`${ri}-${i}`}
-                text={w.text}
-                accent={w.accent}
-                index={ri * 3 + i}
-                weight={weight}
-                entered={entered}
-                reduced={!!prefersReduced}
-              />
+              <span key={`${ri}-${i}`}>
+                <HeroWord
+                  text={w.text}
+                  accent={w.accent}
+                  index={ri * 3 + i}
+                  weight={weight}
+                  entered={entered}
+                  reduced={!!prefersReduced}
+                />
+                {i < row.length - 1 ? " " : ""}
+              </span>
             ))}
           </span>
         ))}

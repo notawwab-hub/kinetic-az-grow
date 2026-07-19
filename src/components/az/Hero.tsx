@@ -69,7 +69,7 @@ export function Hero() {
     >
       <motion.h1
         style={{ skewX: prefersReduced ? 0 : touch ? scrollSkew : sSkew }}
-        className="w-full max-w-full break-words hyphens-auto pb-[0.15em] pr-2 font-display leading-[0.95] tracking-[-0.03em] text-[clamp(1.9rem,10.5vw,8.5rem)] md:max-w-[22ch] md:leading-[0.9]"
+        className="w-full max-w-full pb-[0.15em] pr-2 font-display leading-[0.95] tracking-[-0.03em] text-[clamp(1.75rem,9.5vw,8.5rem)] md:max-w-[22ch] md:leading-[0.9]"
       >
         {[words, words2].map((row, ri) => (
           <span key={ri} className="block">

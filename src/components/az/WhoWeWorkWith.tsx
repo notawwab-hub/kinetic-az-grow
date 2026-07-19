@@ -77,7 +77,9 @@ function Marquee({ direction, speed }: { direction: "left" | "right"; speed: num
     <div
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
-      className="w-full overflow-hidden"
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+      className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden"
     >
       <div
         ref={trackRef}
@@ -87,12 +89,9 @@ function Marquee({ direction, speed }: { direction: "left" | "right"; speed: num
         {[...content, ...content].map((t, i) => (
           <span
             key={i}
-            className="text-stroke inline-block px-6 font-display leading-[1] tracking-[-0.02em] text-[clamp(2.5rem,9vw,7rem)]"
+            className="text-stroke inline-block px-8 font-display leading-[1] tracking-[-0.02em] text-[clamp(2.5rem,9vw,7rem)]"
           >
             {t}
-            <span aria-hidden className="mx-6 text-[color:var(--color-ember)]">
-              ✳
-            </span>
           </span>
         ))}
       </div>

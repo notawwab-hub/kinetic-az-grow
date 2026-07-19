@@ -1,5 +1,11 @@
-import { useRef } from "react";
-import { motion, useMotionTemplate, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { useIsTouch } from "./hooks";
 
 const steps = [
@@ -22,8 +28,6 @@ function ProcessDesktop() {
     target: ref,
     offset: ["start start", "end end"],
   });
-  // Translate in vw so it doesn't depend on the flex container's own width.
-  // Move by (n-1) * 100vw so the last step lands fully centered.
   const xVw = useTransform(scrollYProgress, [0, 1], [0, -(steps.length - 1) * 100]);
   const x = useMotionTemplate`${xVw}vw`;
   const progressW = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
@@ -71,9 +75,45 @@ function ProcessDesktop() {
 }
 
 function ProcessMobile() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [vw, setVw] = useState(0);
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const x = useMotionValue(0);
+  const maxDrag = vw * (steps.length - 1);
+  const progressW = useTransform(x, [0, -maxDrag || -1], ["0%", "100%"]);
+
+  useEffect(() => {
+    const update = () => setVw(window.innerWidth);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("az-process-hint") === "1") setHintDismissed(true);
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  const dismissHint = () => {
+    if (hintDismissed) return;
+    setHintDismissed(true);
+    try {
+      sessionStorage.setItem("az-process-hint", "1");
+    } catch {
+      /* noop */
+    }
+  };
+
   return (
-    <section id="process" className="relative w-full px-6 py-24">
-      <div className="mb-10 flex items-baseline justify-between">
+    <section
+      id="process"
+      ref={containerRef}
+      className="relative w-full overflow-hidden py-16"
+    >
+      <div className="mb-8 flex items-baseline justify-between px-6">
         <h2 className="font-display text-[clamp(2rem,8vw,3rem)] leading-[0.95] tracking-[-0.03em]">
           Our Process.
         </h2>
@@ -81,26 +121,57 @@ function ProcessMobile() {
           [ 04 / 06 ]
         </span>
       </div>
-      <ol className="flex flex-col gap-16">
-        {steps.map((s, i) => (
-          <motion.li
-            key={s.n}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-15%" }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="border-l border-[color:var(--color-border)] pl-4"
-          >
-            <div className="font-display font-bold leading-[0.85] text-[clamp(5rem,26vw,10rem)]">
-              {s.n}
+
+      <div className="relative touch-pan-y">
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: -maxDrag, right: 0 }}
+          dragElastic={0.08}
+          style={{ x }}
+          onDragStart={dismissHint}
+          className="flex w-max will-change-transform"
+        >
+          {steps.map((s) => (
+            <div
+              key={s.n}
+              style={{ width: vw || "100vw" }}
+              className="flex shrink-0 flex-col items-start justify-center px-6"
+            >
+              <div className="font-display font-bold leading-[0.85] tracking-[-0.05em] text-[clamp(7rem,42vw,14rem)]">
+                {s.n}
+              </div>
+              <div className="mt-6 font-display text-[clamp(1.25rem,6vw,2rem)] tracking-[-0.02em]">
+                {s.label}
+              </div>
             </div>
-            <div className="mt-2 font-display text-xl">{s.label}</div>
-            {i === steps.length - 1 ? null : (
-              <div className="mt-8 h-px w-8 bg-[color:var(--color-ember)]" />
-            )}
-          </motion.li>
-        ))}
-      </ol>
+          ))}
+        </motion.div>
+
+        {!hintDismissed && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="pointer-events-none absolute right-6 bottom-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] text-[color:var(--color-ember)] uppercase"
+          >
+            <span>Swipe</span>
+            <motion.span
+              aria-hidden
+              animate={{ x: [0, 8, 0] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              →
+            </motion.span>
+          </motion.div>
+        )}
+      </div>
+
+      <div className="mx-6 mt-10 h-px bg-[color:var(--color-border)]">
+        <motion.div
+          style={{ width: progressW }}
+          className="h-px bg-[color:var(--color-ember)]"
+        />
+      </div>
     </section>
   );
 }

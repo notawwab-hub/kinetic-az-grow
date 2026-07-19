@@ -11,7 +11,7 @@ export function Vision() {
   return (
     <section
       id="vision"
-      className="relative flex min-h-[130vh] w-full flex-col justify-center overflow-hidden px-6 py-32 md:px-16"
+      className="relative flex w-full flex-col justify-center overflow-hidden px-6 py-24 md:min-h-[130vh] md:px-16 md:py-32"
       suppressHydrationWarning
     >
       <div className="mb-12 flex items-baseline justify-between">

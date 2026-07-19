@@ -1,54 +1,62 @@
-## Fixes for azventures.co pre-launch
+## Part 0 — Critical mobile bug fixes
 
-### 1. Hero headline clipping
-Current `Hero.tsx` uses `max-w-[18ch]` with `text-[clamp(2.75rem,10.5vw,10.5rem)]` and a skewX transform on the whole `<h1>`. At wide viewports the last word ("value.") gets pushed past the container edge and the italic "stronger" descender clips because `overflow-hidden` is on the section. Fix:
-- Widen the headline container (`max-w-none`, or `max-w-[22ch]` with an outer `pr-*` guard) and reduce the max clamp (e.g. `clamp(2.5rem, 9vw, 8.5rem)`) so both lines fit on desktop and mobile.
-- Add vertical breathing room (`pb-[0.15em]`) so italic/descenders aren't cropped by `overflow-hidden`.
-- Reduce skew amplitude on small screens (disable skew under `md`) since it amplifies clipping on narrow widths.
+**Hero overflow (`src/components/az/Hero.tsx`)**
+- Lower the mobile end of the headline clamp so long words fit at 360–480px, e.g. `text-[clamp(1.9rem,11vw,8.5rem)]`, and remove the `max-w-[22ch]` cap on mobile (`max-w-full md:max-w-[22ch]`) so wrapping is driven by the viewport, not a ch-based ceiling that pushes "businesses." off-screen.
+- Add `break-words` / `hyphens-auto` on the `<h1>`.
 
-### 2. Process section only shows steps 01–02
-The desktop pinned-scroll uses `height: 500vh` and translates the strip by `-80%` of its own width (which is `500vw`), which mathematically should land on step 05. In practice the section stops scrolling early because it sits at the end of the page with no room below, so `scrollYProgress` never reaches 1 before the next section takes over and only steps 01–02 come into view. Fix:
-- Compute translate as `-((n-1)/n * 100)%` = `-80%` but map it to `useTransform(scrollYProgress, [0, 0.95], ...)` and add a trailing spacer so the sticky container can actually complete its scroll range.
-- Alternatively (simpler + more reliable): translate in `vw` units — `useTransform(scrollYProgress, [0, 1], [0, -(steps.length - 1) * 100])` and apply as `x: \`${v}vw\``. This decouples math from container width.
-- Verify with a Playwright scroll test that steps 03/04/05 render.
+**Dead scroll gaps**
+- `Process.tsx` desktop variant currently sets `height: steps.length * 100vh` even on mobile before `useIsTouch` resolves. Move the height onto the desktop branch only; mobile uses the new swipe version (Part 1) with `min-h-screen`, no oversized outer.
+- `Vision.tsx` uses `min-h-[130vh]`; drop to `min-h-screen md:min-h-[130vh]` so the section isn't a tall empty box on mobile.
+- Audit `Challenges.tsx` (`py-32`) and other sections — no scroll pinning there, but confirm no `100vh` spacers remain on mobile.
 
-### 3. Missing navbar / site menu
-Add a fixed top navbar rendered inside `__root.tsx` (so it appears on every route, including future pages) with:
-- Wordmark "AZ Ventures" linking to `/`.
-- Section anchors: Challenges, What We Do, Process, Clients, Vision, Contact (add matching `id="..."` to each section component).
-- CTA button "Start a conversation" → `#contact`.
-- Mobile: hamburger opens a full-screen overlay menu with the same links, large tap targets (min 44px), smooth close on link tap.
-- Style: transparent over hero, gains a subtle backdrop-blur + border when scrolled (IntersectionObserver on hero or scrollY listener).
-- Respect `prefers-reduced-motion`.
+**Marquee clipping + stray icon (`WhoWeWorkWith.tsx`)**
+- Wrap each `Marquee` in a `w-screen relative left-1/2 -translate-x-1/2 overflow-hidden` container so the tiling row is clipped at the true viewport edge (currently the parent `section` has default padding contexts that leave the track visible past its own overflow box on some widths).
+- Increase content duplication (already `[...content, ...content]` where `content` is 3×; keep it and reset `offset` wrapping math so no gap appears mid-loop).
+- Remove the ✳ separator span entirely (the "stray icon"); replace with plain spacing (e.g. `mx-8` gap) since the site is text-only.
 
-### 4. Mobile optimization pass
-Audit every section at 360–430px widths:
-- Ensure headings use `clamp()` with a sensible min so nothing overflows; add `min-w-0` and `break-words` where needed.
-- Replace any horizontal-scroll or pinned-scroll effects with stacked layouts on touch devices (Process already does this; verify Challenges, WhatWeDo, WhoWeWorkWith, Vision).
-- Ensure section padding is `px-6` on mobile / `px-16` on desktop consistently.
-- Tap targets ≥ 44px; disable custom cursor on touch (verify `CustomCursor`).
-- Contact form/CTA reachable without horizontal scroll; email/phone are `tel:`/`mailto:` links.
-- Confirm the `[ 0X / 06 ]` counters shown in corners don't overlap content on small screens.
+**"What We Do" outline on mobile (`WhatWeDo.tsx`)**
+- Current logic keys the outline off `active` which toggles on `pointerenter`. On touch, pointerenter fires on tap and stays until another tap elsewhere, so items look "solid" once tapped. Change at-rest to always use `.text-stroke`; only fill on hover (desktop) or while `active` (tap toggle) — ensure initial render on touch is stroke.
+- Verify the `motion.h3` `animate.color` starts as `transparent` (stroke visible) and only becomes ember when `active`. Remove the inline `style` override so the utility class governs the resting look.
 
-### 5. Full pre-launch review
-- **SEO / metadata**: add per-section anchor IDs, verify canonical URL uses the real domain (`https://azventures.co/`) not `/`; update `og:url`, canonical, and JSON-LD `url`. Replace `/og.jpg` with a real generated OG image at absolute URL. Ensure single H1 (Hero) and section H2s.
-- **Favicon / manifest**: verify `favicon.ico`, `apple-touch-icon.png`, `site.webmanifest`, theme-color meta are present in `__root.tsx`.
-- **Accessibility**: add `aria-label` to nav, ensure color contrast on `--color-muted-foreground` meets WCAG AA, add `alt` text to any imagery, add `aria-current` on active nav link, focus-visible outlines on interactive elements.
-- **Performance**: lazy-load below-the-fold heavy motion sections; preconnect to any font hosts; ensure images are `loading="lazy"` and sized.
-- **Content sweep**: verify the phone `+971 4 269 8181`, email `azventuresadvisory@gmail.com`, and any stats/claims ("500+ Businesses", "30+ Years") match what the user wants public.
-- **Legal**: add a footer with copyright, links to Privacy Policy and Terms (stub pages under `src/routes/privacy.tsx`, `src/routes/terms.tsx` with placeholder copy the user can fill).
-- **Sitemap**: verify `sitemap[.]xml.ts` lists the real routes and uses `azventures.co`.
-- **Analytics**: (optional) ask whether to wire Plausible / GA4.
+## Part 1 — Mobile animations match desktop (touch-driven)
 
-### Verification
-After implementation:
-1. Playwright script at 375px, 768px, 1440px viewports — screenshot each section, confirm no clipping.
-2. Scroll test on Process section — confirm all 5 steps render.
-3. Click through navbar links on desktop and mobile menu.
-4. Build check.
+**Hero skew**
+- Keep pointer-driven skew on desktop. On touch, replace with a subtle scroll-linked skew: map `scrollYProgress` (0→1 across hero) to `skewX` ±3deg using `useTransform`. Optionally attempt `DeviceOrientationEvent` gyro with permission on iOS; fall back to scroll-linked when unavailable/denied. No feature removal.
 
-### Open questions (please confirm before I build)
-1. **Logo / wordmark**: use plain text "AZ Ventures" for now, or do you have a logo file to drop in?
-2. **Footer legal pages**: create empty Privacy/Terms stubs, or skip until you have copy?
-3. **OG image**: want me to generate a branded hero-style OG image, or leave `/og.jpg` for you to supply?
-4. **Analytics**: add Plausible/GA4 now or later?
+**Process — swipe-driven horizontal (`Process.tsx`)**
+- Replace `ProcessMobile` stacked list with a full-screen horizontal pager that uses framer-motion's `drag="x"` on the same `steps.map` row, with `dragConstraints` computed from `steps.length * viewportWidth`.
+- Sync the same progress bar to drag position via a shared `MotionValue`.
+- Keep desktop scroll-scrub variant unchanged.
+- Add a one-time swipe hint (small "swipe →" label + arrow) that fades out on first drag, persisted with `sessionStorage`.
+
+**Challenges + Vision on mobile**
+- Both are scroll-driven already; verify `useScroll({ target })` offsets fire correctly at mobile viewport. Adjust Vision `offset` to `["start end","center center"]` (already so) and ensure section height on mobile still gives room for assembly (keep `min-h-screen` from Part 0).
+
+**What We Do tap parity** — covered above; ensure animation duration/easing (`0.5s [0.22,1,0.36,1]`) is unchanged.
+
+**Marquee touch-hold pause** — swap `onPointerEnter/Leave` for `onTouchStart/End` in addition to pointer events (pointer events already cover touch; verify no accidental pause-on-scroll).
+
+**CustomCursor** — already gated by `useHasFinePointer`; leave as is.
+
+## Part 2 — Copy refresh
+
+**`Hero.tsx`**
+- Tag: `[ STRATEGIC ADVISORY — MIDDLE EAST ]`
+- Stat strip: `30+ Years of Family Expertise` · `Proven Across the UAE` · `Now Advising the Middle East`
+
+**`WhatWeDo.tsx`** — replace the three `desc` strings with the new sentences (words unchanged).
+
+**`Contact.tsx`** — footer paragraph replaced with the new Dubai/Middle East + KAR family line. Contact links untouched.
+
+**`routes/index.tsx`**
+- `DESC` → "Middle East-focused business transformation and growth advisory firm, founded by the family behind KAR Business Services' 30+ years of UAE expertise."
+- JSON-LD `areaServed` → `["United Arab Emirates", "Middle East"]`.
+
+## Verification
+Run a Playwright pass at 375px and 1440px:
+- screenshot hero to confirm no overflow
+- scroll to confirm no black gaps before Challenges/Vision
+- swipe the Process pager on mobile viewport
+- confirm marquee has no ✳ and no clipped words
+- confirm "What We Do" items render outline-only at rest on touch
+- confirm updated copy renders throughout

@@ -7,6 +7,8 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import { useIsTouch } from "./hooks";
+
 
 const words = [
   { text: "Building", accent: false },
@@ -22,6 +24,7 @@ const words2 = [
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
+  const touch = useIsTouch();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -29,11 +32,12 @@ export function Hero() {
   // Weight morphs 200 -> 700 as scroll enters, and settles at 500 as it exits (heavier resting)
   const weight = useTransform(scrollYProgress, [0, 0.35, 1], [200, 700, 500]);
 
-  // Skew from cursor X
+  // Skew: cursor-driven on desktop, scroll-linked fallback on touch
   const skew = useMotionValue(0);
   const sSkew = useSpring(skew, { stiffness: 150, damping: 20 });
+  const scrollSkew = useTransform(scrollYProgress, [0, 0.5, 1], [-3, 0, 3]);
   useEffect(() => {
-    if (prefersReduced) return;
+    if (prefersReduced || touch) return;
     const el = ref.current;
     if (!el) return;
     const move = (e: PointerEvent) => {
@@ -48,7 +52,8 @@ export function Hero() {
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerleave", leave);
     };
-  }, [prefersReduced, skew]);
+  }, [prefersReduced, touch, skew]);
+
 
   const [entered, setEntered] = useState(false);
   useEffect(() => {
@@ -63,21 +68,23 @@ export function Hero() {
       className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 pt-32 pb-16 md:px-16 md:pt-40"
     >
       <motion.h1
-        style={{ skewX: prefersReduced ? 0 : sSkew }}
-        className="w-full max-w-[22ch] pb-[0.15em] pr-2 font-display leading-[0.95] tracking-[-0.03em] text-[clamp(2.25rem,8.5vw,8.5rem)] md:leading-[0.9]"
+        style={{ skewX: prefersReduced ? 0 : touch ? scrollSkew : sSkew }}
+        className="w-full max-w-full pb-[0.15em] pr-2 font-display leading-[0.95] tracking-[-0.03em] text-[clamp(1.75rem,9.5vw,8.5rem)] md:max-w-[22ch] md:leading-[0.9]"
       >
         {[words, words2].map((row, ri) => (
           <span key={ri} className="block">
             {row.map((w, i) => (
-              <HeroWord
-                key={`${ri}-${i}`}
-                text={w.text}
-                accent={w.accent}
-                index={ri * 3 + i}
-                weight={weight}
-                entered={entered}
-                reduced={!!prefersReduced}
-              />
+              <span key={`${ri}-${i}`}>
+                <HeroWord
+                  text={w.text}
+                  accent={w.accent}
+                  index={ri * 3 + i}
+                  weight={weight}
+                  entered={entered}
+                  reduced={!!prefersReduced}
+                />
+                {i < row.length - 1 ? " " : ""}
+              </span>
             ))}
           </span>
         ))}
@@ -90,7 +97,7 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="font-mono text-xs tracking-[0.2em] text-[color:var(--color-muted-foreground)] uppercase"
         >
-          [ Trusted UAE Advisory — 30+ Years of Experience ]
+          [ Strategic Advisory — Middle East ]
         </motion.p>
       </div>
 
@@ -120,11 +127,11 @@ export function Hero() {
           transition={{ duration: 0.9, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] tracking-[0.18em] text-[color:var(--color-muted-foreground)] uppercase md:text-xs"
         >
-          <span>500+ Businesses Guided</span>
+          <span>30+ Years of Family Expertise</span>
           <span aria-hidden>·</span>
-          <span>30+ Years in the UAE Market</span>
+          <span>Proven Across the UAE</span>
           <span aria-hidden>·</span>
-          <span>Backed by KAR Business Services</span>
+          <span>Now Advising the Middle East</span>
         </motion.div>
       </div>
 
@@ -170,7 +177,6 @@ function HeroWord({
       }
     >
       {text}
-      {index !== 5 ? "\u00A0" : ""}
     </motion.span>
   );
 }

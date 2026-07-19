@@ -4,15 +4,15 @@ import { AnimatePresence, motion } from "framer-motion";
 const items = [
   {
     word: "Transformation",
-    desc: "Comprehensive corporate health assessments and turnaround planning that simplify your path back to strong performance.",
+    desc: "Real operational assessments and turnaround planning — built on decades of hands-on experience, not theory.",
   },
   {
     word: "Growth",
-    desc: "Tailored growth frameworks and operating systems, backed by decades of hands-on UAE business experience.",
+    desc: "Growth systems designed by people who've actually built and run businesses in this region, not just advised on them.",
   },
   {
     word: "Market Entry",
-    desc: "Your trusted partner for business setup and market entry — simplifying your journey into Dubai.",
+    desc: "From the UAE to the wider Middle East — we know what it actually takes to set up and succeed here.",
   },
 ];
 
@@ -57,11 +57,6 @@ function Row({ word, desc, index }: { word: string; desc: string; index: number 
         className={`font-display leading-[0.9] tracking-[-0.03em] text-[clamp(2.5rem,10vw,8rem)] ${
           active ? "" : "text-stroke"
         }`}
-        style={
-          active
-            ? { WebkitTextStroke: "0px transparent", color: "var(--color-ember)" }
-            : undefined
-        }
       >
         {word}
       </motion.h3>

@@ -107,8 +107,9 @@ export function Contact() {
 
       <footer className="mt-24 border-t border-[color:var(--color-border)] pt-8">
         <p className="font-mono text-[10px] leading-relaxed tracking-[0.15em] text-[color:var(--color-muted-foreground)] uppercase md:text-xs">
-          AZ Ventures Advisory LLC — Dubai, UAE. Backed by 30+ years of trusted advisory
-          experience through KAR Business Services.
+          AZ Ventures Advisory LLC — Headquartered in Dubai, serving clients across the Middle
+          East. Founded by the family behind KAR Business Services, trusted in the UAE for over
+          30 years.
         </p>
       </footer>
     </section>

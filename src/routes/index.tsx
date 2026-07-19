@@ -12,7 +12,7 @@ import { Contact } from "@/components/az/Contact";
 const TITLE =
   "AZ Ventures Advisory | Business Transformation, Turnaround & Growth Advisory in Dubai";
 const DESC =
-  "Dubai-based business transformation and growth advisory firm helping SMEs fix operational issues, scale sustainably, and expand into the UAE market.";
+  "Middle East-focused business transformation and growth advisory firm, founded by the family behind KAR Business Services' 30+ years of UAE expertise.";
 
 const SITE = "https://azventures.co";
 
@@ -24,7 +24,7 @@ const jsonLd = {
   url: SITE,
   email: "azventuresadvisory@gmail.com",
   telephone: "+971 4 269 8181",
-  areaServed: "Dubai, United Arab Emirates",
+  areaServed: ["United Arab Emirates", "Middle East"],
   address: {
     "@type": "PostalAddress",
     addressLocality: "Dubai",

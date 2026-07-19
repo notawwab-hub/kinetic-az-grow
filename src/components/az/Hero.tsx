@@ -177,7 +177,6 @@ function HeroWord({
       }
     >
       {text}
-      {index !== 5 ? " " : ""}
     </motion.span>
   );
 }
